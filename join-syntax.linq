@@ -9,45 +9,31 @@
   <Output>DataGrids</Output>
 </Query>
 
-var query = TblBatteryInfo
-   .Join(
-	  TblProducts,
-	  mbi => mbi.ProductID,
-	  prod => (Int32?)(prod.Product_id),
-	  (mbi, prod) =>
-		 new
-		 {
-			 mbi = mbi,
-			 prod = prod
-		 }
-   )
-   .Join(
-	  TblSubCategories,
-	  temp0 => temp0.prod.SubCategory_id,
-	  subc => subc.SubCategory_id,
-	  (temp0, subc) =>
-		 new
-		 {
-			 temp0 = temp0,
-			 subc = subc
-		 }
-   )
-   .Join(
-	  TblBatteryInfo,
-	  temp1 => temp1.temp0.mbi.BatteryInfoID,
-	  bi => bi.BatteryInfoID,
-	  (temp1, bi) => temp1.temp0.mbi.BebatID);
-
-query.Dump();
-/*
-var query = from mbi in TblBatteryInfo
-			join prod in TblProducts on mbi.ProductID equals prod.Product_id
+var query = from mbi in TblMonthlyBatteryInputs
+			join prod in TblProducts on mbi.Product_ID equals prod.Product_id
 			join subc in TblSubCategories on prod.SubCategory_id equals subc.SubCategory_id
 			join bi in TblBatteryInfo on mbi.BatteryInfoID equals bi.BatteryInfoID
-			select mbi.BebatID;
+			select new { MonthlyBatteryInput = mbi, Product = prod, SubCategory = subc, BatteryInfo = bi };
 
-query.Dump();
+var reportViewModel = from q in query
+					  select new
+					  {
+						  ProducerRegistrationNumber = q.MonthlyBatteryInput.RegistrationNo,
+						  MonthId = q.MonthlyBatteryInput.TblMonthEnd.DateIndex,
+						  BatteryInfoID = q.MonthlyBatteryInput.BatteryInfoID,
+						  BatteryRef = q.BatteryInfo.BebatID,
+						  IecCode = q.BatteryInfo.IEC,
+						  ProductName = q.Product.Name,
+						  ProductDescription = q.Product.Description,
+						  SubCategoryName = q.SubCategory.Name,
+						  Quantity = q.MonthlyBatteryInput.Quantity,
+						  Weight = q.MonthlyBatteryInput.Weight,
+						  ProductId = q.MonthlyBatteryInput.Product_ID,
+					  };
 
+reportViewModel.Dump();
+
+/*
 SELECT mbi.BatteryInfoID
 	,bi.BebatID as 'BatteryRef'
 	,bi.IEC as 'IecCode'
@@ -63,4 +49,4 @@ JOIN TblSubCategory subc ON subc.SubCategory_id = prod.SubCategory_id
 JOIN tblBatteryInfo bi ON bi.BatteryInfoID = mbi.BatteryInfoID
 WHERE RegistrationNo = 1
 	AND DateIndex = 119
-	*/
+*/
