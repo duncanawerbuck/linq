@@ -34,36 +34,33 @@ var reportViewModel = from q in query
 
 var groupedByProduct = reportViewModel.GroupBy(vm => vm.ProductId);
 
-var withWeightSummed = from summedWeight in groupedByProduct
-select new
-{
-	ProducerRegistrationNumber = summedWeight.Key,
-	
-	BatteryInfoID = summedWeight.First().BatteryInfoID,
-	MonthId = summedWeight.First().MonthId,
-	BatteryRef = summedWeight.First().BatteryRef,
-	IecCode = summedWeight.First().IecCode,
-	ProductName = summedWeight.First().ProductName,
-	ProductDescription = summedWeight.First().ProductDescription,
-	SubCategoryName = summedWeight.First().SubCategoryName,
-	Quantity = summedWeight.First().Quantity,
-	Weight = summedWeight.First().Weight,
-	ProductId = summedWeight.First().ProductId,
-	
-	TotalWeight = summedWeight.Sum(w => w.Quantity),
-    TotalEntries = summedWeight.Count()
-};
+var productsWithWeightSummedByProduct = from summedWeight in groupedByProduct
+										select new
+										{
+											ProducerRegistrationNumber = summedWeight.Key,
 
-withWeightSummed.Dump();
+											BatteryInfoID = summedWeight.First().BatteryInfoID,
+											MonthId = summedWeight.First().MonthId,
+											BatteryRef = summedWeight.First().BatteryRef,
+											IecCode = summedWeight.First().IecCode,
+											ProductName = summedWeight.First().ProductName,
+											ProductDescription = summedWeight.First().ProductDescription,
+											SubCategoryName = summedWeight.First().SubCategoryName,
+											Quantity = summedWeight.First().Quantity,
+											Weight = summedWeight.First().Weight,
+											ProductId = summedWeight.First().ProductId,
 
-//var productGroups = from prodGroup in groupedByProduct select prodGroup;
-//
-//productGroups.ToList().ForEach(g => { g.First().Dump(); });
+											TotalWeight = summedWeight.Sum(w => w.Quantity),
+											TotalEntries = summedWeight.Count()
+										};
 
+productsWithWeightSummedByProduct.Dump();
 
 //reportViewModel.Dump();
 
 /*
+
+Manual T-SQL query for raw data (same as reportViewModel above)
 SELECT mbi.BatteryInfoID
 	,bi.BebatID as 'BatteryRef'
 	,bi.IEC as 'IecCode'
