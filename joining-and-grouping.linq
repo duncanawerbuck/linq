@@ -13,6 +13,7 @@ var query = from mbi in TblMonthlyBatteryInputs
 			join prod in TblProducts on mbi.Product_ID equals prod.Product_id
 			join subc in TblSubCategories on prod.SubCategory_id equals subc.SubCategory_id
 			join bi in TblBatteryInfo on mbi.BatteryInfoID equals bi.BatteryInfoID
+			where mbi.DateIndex == 119 && mbi.RegistrationNo == 1
 			select new { MonthlyBatteryInput = mbi, Product = prod, SubCategory = subc, BatteryInfo = bi };
 
 var reportViewModel = from q in query
@@ -31,7 +32,36 @@ var reportViewModel = from q in query
 						  ProductId = q.MonthlyBatteryInput.Product_ID,
 					  };
 
-reportViewModel.Dump();
+var groupedByProduct = reportViewModel.GroupBy(vm => vm.ProductId);
+
+var withWeightSummed = from summedWeight in groupedByProduct
+select new
+{
+	ProducerRegistrationNumber = summedWeight.Key,
+	
+	BatteryInfoID = summedWeight.First().BatteryInfoID,
+	MonthId = summedWeight.First().MonthId,
+	BatteryRef = summedWeight.First().BatteryRef,
+	IecCode = summedWeight.First().IecCode,
+	ProductName = summedWeight.First().ProductName,
+	ProductDescription = summedWeight.First().ProductDescription,
+	SubCategoryName = summedWeight.First().SubCategoryName,
+	Quantity = summedWeight.First().Quantity,
+	Weight = summedWeight.First().Weight,
+	ProductId = summedWeight.First().ProductId,
+	
+	TotalWeight = summedWeight.Sum(w => w.Quantity),
+    TotalEntries = summedWeight.Count()
+};
+
+withWeightSummed.Dump();
+
+//var productGroups = from prodGroup in groupedByProduct select prodGroup;
+//
+//productGroups.ToList().ForEach(g => { g.First().Dump(); });
+
+
+//reportViewModel.Dump();
 
 /*
 SELECT mbi.BatteryInfoID
